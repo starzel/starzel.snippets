@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from Acquisition import aq_parent
 from lxml import etree
 from lxml.html import fromstring
 from plone import api
@@ -15,6 +16,8 @@ from zope.component import adapts
 from zope.component import getUtility
 from zope.interface import implements
 from zope.interface import Interface
+
+import types
 
 
 class SnippetTransform(object):
@@ -33,25 +36,7 @@ class SnippetTransform(object):
     def transformUnicode(self, result, encoding):
         return result
 
-    def transformIterable(self, result, encoding):
-        if self.request['PATH_INFO'].endswith('edit'):
-            return result
-
-        contentType = self.request.response.getHeader('Content-Type')
-        if contentType is None or not contentType.startswith('text/html'):
-            return None
-
-        ce = self.request.response.getHeader('Content-Encoding')
-        if ce and ce in ('zip', 'deflate', 'compress'):
-            return None
-        try:
-            if result == ['']:
-                return None
-
-            result = getHTMLSerializer(result, pretty_print=False)
-        except (TypeError):
-            return None
-
+    def transformSnippets(self, result):
         site = api.portal.get()
         site_path = '/'.join(site.getPhysicalPath())
         root = result.tree.getroot()
@@ -119,5 +104,47 @@ class SnippetTransform(object):
                     parent = el.getparent()
                     idx = parent.index(el)
                     parent[idx] = snippet_container
+
+    def transformTextSnippets(self, result):
+        # control transforms
+        root = result.tree.getroot()
+
+        context = self.getContext()
+
+        for el in root.cssselect('[data-type="text_snippet_tag"]'):
+            try:
+                el.text = el.text.format(**{
+                    'title': context.Title()
+                })
+            except KeyError:
+                pass
+
+    def getContext(self):
+        published = self.request.get('PUBLISHED')
+        if isinstance(published, types.MethodType):
+            return published.im_self
+        return aq_parent(published)
+
+    def transformIterable(self, result, encoding):
+        if self.request['PATH_INFO'].endswith('edit'):
+            return result
+
+        contentType = self.request.response.getHeader('Content-Type')
+        if contentType is None or not contentType.startswith('text/html'):
+            return None
+
+        ce = self.request.response.getHeader('Content-Encoding')
+        if ce and ce in ('zip', 'deflate', 'compress'):
+            return None
+        try:
+            if result == ['']:
+                return None
+
+            result = getHTMLSerializer(result, pretty_print=False)
+        except (TypeError):
+            return None
+
+        self.transformSnippets(result)
+        self.transformTextSnippets(result)
 
         return result

@@ -299,7 +299,81 @@
   };
 
 
-  // tinymce plugin here!
+  var TextEmbedModal = function(options){
+    var that = this;
+
+    that.options = options;
+
+    var text = '';
+    if(options.$node){
+      text = options.$node.html();
+    }
+
+    that.modal = new Modal(options.$el, {
+      html: that.template({
+        text: text
+      }),
+      content: null,
+      buttons: '.plone-btn'
+    });
+    that.modal.on('shown', function() {
+      that.init();
+    });
+  };
+
+  TextEmbedModal.prototype.show = function(){
+    this.modal.show();
+  };
+
+  TextEmbedModal.prototype.template = _.template('<div>' +
+    '<h1>Add text</h1>' +
+    '<div>' +
+      '<div class="form-group text-content">' +
+        '<label>Enter content</label>' +
+        '<textarea><%= text %></textarea>' +
+      '</div>' +
+    '</div>' +
+    '<button class="plone-btn plone-btn-default cancel-btn">Cancel</button>' +
+    '<button class="plone-btn plone-btn-primary insert-btn">Insert</button>' +
+  '</div>');
+
+  TextEmbedModal.prototype.init = function(){
+    var that = this;
+    var modal = this.modal;
+
+    $('button', modal.$modal).off('click').on('click', function(){
+      var $btn = $(this);
+      that.btnClicked($btn);
+    });
+  };
+
+  TextEmbedModal.prototype.btnClicked = function($btn){
+    var $node = this.options.$node;
+    var ed = this.options.editor;
+    var modal = this.modal;
+
+    if(!$btn.hasClass('insert-btn')){
+      modal.hide();
+      return;
+    }
+
+    var text = $('.text-content textarea', modal.$modal).val();
+    var attrs = {
+      class: 'text-snippet-tag',
+      'data-type': 'text_snippet_tag',
+      contenteditable: false
+    };
+    if($node){
+      $node.attr(attrs);
+      $node.html(text);
+    }else{
+      ed.insertContent(ed.dom.createHTML('span', attrs, text));
+    }
+    modal.hide();
+  };
+
+
+  // tinymce plugins here!
   tinymce.create('tinymce.plugins.SnippetsPlugin', {
 
     init : function (ed) {
@@ -332,9 +406,35 @@
         }
       });
 
+      function openTextSnippetWindow($node) {
+        var $el = $('<div/>');
+        $('body').append($el);
+
+        var modal = new TextEmbedModal({
+          $node: $node,
+          editor: ed,
+          $el: $el
+        });
+        modal.show();
+      }
+
+      ed.addCommand('textsnippets', function () {
+        var $el = $(ed.selection.getNode());
+        if($el.is('[data-type="text_snippet_tag"]')){
+          openTextSnippetWindow($el);
+        }else{
+          openTextSnippetWindow();
+        }
+      });
+
       ed.addButton('snippetbutton', {
         cmd : 'snippets',
         image: $('body').attr('data-portal-url') + '/++resource++starzel.snippets/brackets.png'
+      });
+
+      ed.addButton('textsnippetbutton', {
+        cmd : 'textsnippets',
+        image: $('body').attr('data-portal-url') + '/++resource++starzel.snippets/text.png'
       });
     },
   });

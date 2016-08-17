@@ -15,6 +15,7 @@
           interface="Products.CMFPlone.interfaces.controlpanel.ITinyMCESchema" field="custom_buttons">
     <value purge="False">
       <element>snippetbutton</element>
+      <element>textsnippetbutton</element>
     </value>
   </record>
 
