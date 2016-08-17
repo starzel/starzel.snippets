@@ -1,0 +1,30 @@
+.snippets-preview .inner {
+  padding: 10px;
+  background: white;
+  border: 1px solid #ccc;
+}
+.snippets-preview h1,
+.snippets-preview h2,
+.snippets-preview h3,
+.snippets-preview h4,
+.snippets-preview h5,
+.snippets-preview h6 {
+  position: relative;
+}
+.snippets-preview h1 .annotation,
+.snippets-preview h2 .annotation,
+.snippets-preview h3 .annotation,
+.snippets-preview h4 .annotation,
+.snippets-preview h5 .annotation,
+.snippets-preview h6 .annotation {
+  position: absolute;
+  top: 0;
+  left: -54px;
+  font-size: 12px;
+  background-color: #525252;
+  padding: 3px;
+  color: white;
+  border-radius: 2px;
+  border: 1px solid #949494;
+  box-shadow: 0 0 6px -1px black;
+}

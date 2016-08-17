@@ -1,0 +1,6 @@
+<layers>
+    <layer
+        name="starzel.snippets"
+        interface="starzel.snippets.interfaces.ISnippetsLayer"
+        />
+</layers>

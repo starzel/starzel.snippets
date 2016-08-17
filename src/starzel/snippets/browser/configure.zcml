@@ -1,0 +1,29 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="starzel.snippets">
+
+  <browser:resourceDirectory
+    name="starzel.snippets"
+    directory="resources"
+    />
+
+  <browser:page
+    name="snippets-api"
+    for="*"
+    permission="cmf.ModifyPortalContent"
+    class=".api.SnippetsAPI"
+    layer="..interfaces.ISnippetsLayer"
+    />
+  <browser:page
+    name="snippets-controlpanel"
+    for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+    class=".controlpanel.SnippetsControlPanel"
+    permission="plone.app.controlpanel.Site"
+    layer="..interfaces.ISnippetsLayer"
+    />
+
+</configure>

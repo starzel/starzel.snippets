@@ -1,0 +1,9 @@
+include *
+
+global-include starzel/snippets *.png *.js *.xml *.css *.zcml *.pt
+global-include starzel/snippets/profiles/default/structure
+
+global-exclude *.pyc
+global-exclude *.DS_Store
+prune starzel/snippets/tests/robot
+prune starzel/snippets/tests
