@@ -330,7 +330,7 @@
     '<div>' +
       '<div class="form-group text-content">' +
         '<label>Enter content</label>' +
-        '<textarea><%= text %></textarea>' +
+        '<input type="text" value="<%= text %>" />' +
       '</div>' +
     '</div>' +
     '<button class="plone-btn plone-btn-default cancel-btn">Cancel</button>' +
@@ -357,7 +357,7 @@
       return;
     }
 
-    var text = $('.text-content textarea', modal.$modal).val();
+    var text = $('.text-content input', modal.$modal).val();
     var attrs = {
       class: 'text-snippet-tag',
       'data-type': 'text_snippet_tag',
