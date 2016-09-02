@@ -298,6 +298,8 @@
     modal.hide();
   };
 
+  var prefix = '[TID:';
+  var suffix = ']';
 
   var TextEmbedModal = function(options){
     var that = this;
@@ -307,6 +309,9 @@
     var text = '';
     if(options.$node){
       text = options.$node.html();
+      if(text.slice(0, 5) == prefix && text.slice(-1) == suffix){
+        text = text.slice(5, -1);
+      }
     }
 
     that.modal = new Modal(options.$el, {
@@ -363,6 +368,7 @@
       'data-type': 'text_snippet_tag',
       contenteditable: false
     };
+    text = prefix + text + suffix;
     if($node){
       $node.attr(attrs);
       $node.html(text);
