@@ -17,6 +17,7 @@
   var utils = require('mockup-utils');
   var Modal = require('mockup-patterns-modal');
   var API_URL = $('body').attr('data-base-url') + '/@@snippets-api';
+  var THIS_UID = null; // UID of current object
 
   var reOptions = {
     vocabularyUrl: $('body').attr('data-portal-url') + '/@@getVocabulary?name=plone.app.vocabularies.Catalog',
@@ -31,6 +32,7 @@
     }
   }).done(function(data){
     reOptions = $.extend({}, true, reOptions, JSON.parse(data.relatedItemsOptions));
+    THIS_UID = data.uid;
   });
 
 
@@ -38,11 +40,22 @@
     var that = this;
 
     that.options = options;
+    that.range = options.editor.selection.getRng();
 
     var uid = '';
     // force loading existing value if something selected
     if(options.$node){
       uid = options.$node.attr('data-snippet-id');
+    }else{
+      // need to create a temp node so we can insert stuff in for rendering
+      // in the same place the cursor was
+      var id = utils.generateId();
+      options.editor.insertContent(
+        options.editor.dom.createHTML('span', {
+          style: 'display:none',
+          id: id,
+          class: 'hidden-snippet'}));
+      that.$tempNode = $('#' + id, options.editor.getBody());
     }
 
     that.modal = new Modal(options.$el, {
@@ -80,7 +93,12 @@
       '<div class="form-group snippets-indent">' +
         '<label>Indentation Level</label>' +
         '<select>' +
-          '<option value="0">0</option>' +
+          '<option value="-5">-5</option>' +
+          '<option value="-4">-4</option>' +
+          '<option value="-3">-3</option>' +
+          '<option value="-2">-2</option>' +
+          '<option value="-1">-1</option>' +
+          '<option value="0" selected="true">0</option>' +
           '<option value="1">1</option>' +
           '<option value="2">2</option>' +
           '<option value="3">3</option>' +
@@ -94,7 +112,7 @@
         'The header structure you have selected is not 508 compliant' +
     '</div>' +
     '<div class="snippets-preview" style="display: none">' +
-      '<h2>Snippet Preview</h2>' +
+      '<h2>Preview</h2>' +
       '<div class="inner"></div>' +
     '</div>' +
     '<button class="plone-btn plone-btn-default cancel-btn">Cancel</button>' +
@@ -116,7 +134,15 @@
 
     re.$el.on('change', function(){
       // populate preview
-      that.update();
+      that.update(true);
+    });
+
+    re.$el.on('select2-loaded', function(e){
+      e.items.results.forEach(function(item, idx){
+        if(item.UID === THIS_UID){
+          $('.select2-drop-active .select2-result').eq(idx).remove();
+        }
+      });
     });
 
     $('.snippets-indent select').on('change', function(){
@@ -134,17 +160,46 @@
     return parseInt(indent);
   };
 
-  SnippetModal.prototype.loadUID = function(uid){
+  SnippetModal.prototype.loadUID = function(uid, newSnippet){
     var that = this;
     var modal = that.modal;
+
+    // this may be weird but in order for us to get the output the way we want
+    // it, we need to render the entire output.
+    // This is complicated because...
+    // 1) we don't want to modify the DOM until we "save"
+    // 2) new snippets are not inserted until "save"
+    // 3) can't change the DOM or cursor will get messed up...
+    // so in order for this to work we need to:
+    // 1) get html copy
+    // 2) update snippet attributes
+    // 3) ask plone to render it for us
+    // this way requires there to be a temp node with id we are currently
+    // pointing at for new snippets OR existing snippets need unique ID
+    var $snippetNode = that.options.$node || that.$tempNode;
+    var id = $snippetNode.attr('id');
+    if(!id){
+      id = utils.setId($snippetNode);
+    }
+
+    var $dom = $(that.options.editor.getBody()).clone();
+    var $outputSnippetNode = $('#' + id, $dom);
+    debugger;
+    $outputSnippetNode.attr({
+      class: 'snippet-tag',
+      'data-type': 'snippet_tag',
+      'data-snippet-id': uid,
+      'data-snippet-indent': that.getIndentLevel()
+    });
+    var html = $dom.html();
 
     utils.loading.show();
     $.ajax({
       url: API_URL,
       data: {
-        uid: uid,
-        action: 'render',
-        indent: this.getIndentLevel()
+        html: html,
+        action: 'transform',
+        method: 'POST'
       }
     }).done(function(data){
       $('.insert-btn', modal.$modal).removeAttr('disabled');
@@ -152,8 +207,11 @@
       $('.snippets-preview', modal.$modal).show();
       $('.snippets-preview .inner', modal.$modal).empty().append($els);
 
-      if(!that.options.$node){
-        that.guessHeaderLevel();
+      if(newSnippet && !that.options.$node){
+        if(that.guessHeaderLevel()){
+          // reload it because the guessed version has changed...
+          that.loadUID(uid);
+        }
       }
 
       that.check508();
@@ -175,23 +233,32 @@
     }
     var topHeaderLevel = parseInt($topHeader[0].tagName[1]);
     var snippetHeaderLevel = parseInt($snippetHeader[0].tagName[1]);
-    if(topHeaderLevel > snippetHeaderLevel){
+    var newLevel = topHeaderLevel - snippetHeaderLevel;
+    if(newLevel != that.getIndentLevel()){
       $('.snippets-indent select', this.modal.$modal).val(topHeaderLevel - snippetHeaderLevel);
+      return true;
     }
+    return false;
   };
 
   SnippetModal.prototype.addHeaderAnnotations = function(){
     // add h1 -> h3 info on each header
-    var indent = this.getIndentLevel();
     $('h1,h2,h3,h4,h5,h6', $('.snippets-preview .inner')).each(function(){
-      var $el = $(this);
-      var current = parseInt($el[0].tagName[1]);
-      $el.prepend($(
-        '<div class="annotation">' +
-          '<span class="from">H' + (current - indent) + '</span>' +
-          '<span class="sep"> ➔ </span>' +
-          '<span class="to">H' + current + '</span>' +
-        '</div>'));
+      var current = this.tagName;
+      var original = this.getAttribute('original-tag');
+      if(!original){
+        $(this).prepend($(
+          '<div class="annotation nochange">' +
+            '<span class="to">' + current.toUpperCase() + '</span>' +
+          '</div>'));
+      }else {
+        $(this).prepend($(
+          '<div class="annotation">' +
+            '<span class="from">' + original.toUpperCase() + '</span>' +
+            '<span class="sep"> ➔ </span>' +
+            '<span class="to">' + current.toUpperCase() + '</span>' +
+          '</div>'));
+      }
     });
   };
 
@@ -224,28 +291,28 @@
   SnippetModal.prototype.check508 = function(){
     var that = this;
     $('.portalMessage', that.modal.$modal).hide();
-    // to check 508 compliance...
-    // need to get closest prior header
-    // and first header in output
-    var $topHeader = that.getClosestContentHeader();
-    var $snippetHeader = that.getFirstSnippetHeader();
 
-    if($topHeader.length === 0 || $snippetHeader.length === 0){
-      return;
-    }
-    var topHeaderLevel = parseInt($topHeader[0].tagName[1]);
-    var snippetHeaderLevel = parseInt($snippetHeader[0].tagName[1]);
-    if(snippetHeaderLevel > (topHeaderLevel + 1)){
+    // to check 508 compliance...
+    // need to go through each header checking if it is nested properly
+    var prevLevel = 1;
+    var valid = true;
+    $('h1,h2,h3,h4,h5,h6', $('.snippets-preview .inner')).each(function(){
+      var level = parseInt(this.tagName[1]);
+      if(level > (prevLevel + 1)){
+        valid = false;
+      }
+    });
+    if(!valid){
       $('.portalMessage', that.modal.$modal).show();
     }
   };
 
-  SnippetModal.prototype.update = function(){
+  SnippetModal.prototype.update = function(newSnippet){
     var that = this;
     var modal = that.modal;
     var data = that.re.$el.select2('data');
     if(data && data.length > 0){
-      that.loadUID(data[0].UID);
+      that.loadUID(data[0].UID, newSnippet);
     }else{
       // clear out
       $('.snippets-preview', modal.$modal).hide();
@@ -258,6 +325,8 @@
     var $node = this.options.$node;
     var ed = this.options.editor;
     var modal = this.modal;
+
+    $('.hidden-snippet', ed.getBody()).remove();
 
     if(!$btn.hasClass('insert-btn')){
       modal.hide();

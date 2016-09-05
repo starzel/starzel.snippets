@@ -1,3 +1,4 @@
+from plone.uuid.interfaces import IUUID
 from plone.app.uuid.utils import uuidToObject
 from plone.registry.interfaces import IRegistry
 from Products.CMFCore.Expression import Expression
@@ -5,6 +6,8 @@ from Products.Five import BrowserView
 from starzel.snippets.utils import ExpressionEvaluator
 from starzel.snippets.utils import render_snippet
 from zope.component import getUtility
+from lxml.html import fromstring, tostring
+from starzel.snippets.transform import SnippetTransform
 
 import json
 
@@ -22,6 +25,8 @@ class SnippetsAPI(BrowserView):
             data = self.get_code()
         elif action == 'render':
             data = self.get_rendered()
+        elif action == 'transform':
+            data = self.get_transformed()
         elif action == 'configuration':
             data = self.get_configuration()
 
@@ -31,7 +36,19 @@ class SnippetsAPI(BrowserView):
         registry = getUtility(IRegistry)
 
         return {
-            'relatedItemsOptions': registry.get('starzel.snippets.related_items_options')
+            'relatedItemsOptions': registry.get('starzel.snippets.related_items_options'),
+            'uid': IUUID(self.context)
+        }
+
+    def get_transformed(self):
+        html = self.request.form.get('html')
+        transform = SnippetTransform(self.context, self.request)
+        dom = fromstring(html)
+        transform.transformSnippets(dom)
+        transform.transformTextSnippets(dom)
+        return {
+            'success': True,
+            'result': tostring(dom)
         }
 
     def get_rendered(self):

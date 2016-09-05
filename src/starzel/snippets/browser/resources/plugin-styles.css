@@ -19,7 +19,7 @@
 .snippets-preview h6 .annotation {
   position: absolute;
   top: 0;
-  left: -54px;
+  left: -59px;
   font-size: 12px;
   background-color: #525252;
   padding: 3px;
@@ -27,4 +27,12 @@
   border-radius: 2px;
   border: 1px solid #949494;
   box-shadow: 0 0 6px -1px black;
+}
+.snippets-preview h1 .annotation.nochange,
+.snippets-preview h2 .annotation.nochange,
+.snippets-preview h3 .annotation.nochange,
+.snippets-preview h4 .annotation.nochange,
+.snippets-preview h5 .annotation.nochange,
+.snippets-preview h6 .annotation.nochange {
+  left: -25px;
 }

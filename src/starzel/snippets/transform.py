@@ -36,10 +36,9 @@ class SnippetTransform(object):
     def transformUnicode(self, result, encoding):
         return result
 
-    def transformSnippets(self, result):
+    def transformSnippets(self, root):
         site = api.portal.get()
         site_path = '/'.join(site.getPhysicalPath())
-        root = result.tree.getroot()
         rendered = {}
 
         registry = getUtility(IRegistry)
@@ -69,7 +68,7 @@ class SnippetTransform(object):
                 ob = data['ob']
                 val = data['html']
 
-                if indent > 0:
+                if indent != 0:
                     val = apply_indentation(val, indent)
 
                 snippet_container = etree.Element('div')
@@ -105,10 +104,7 @@ class SnippetTransform(object):
                     idx = parent.index(el)
                     parent[idx] = snippet_container
 
-    def transformTextSnippets(self, result):
-        # control transforms
-        root = result.tree.getroot()
-
+    def transformTextSnippets(self, root):
         context = self.getContext()
 
         for el in root.cssselect('[data-type="text_snippet_tag"]'):
@@ -144,7 +140,8 @@ class SnippetTransform(object):
         except (TypeError):
             return None
 
-        self.transformSnippets(result)
-        self.transformTextSnippets(result)
+        root = result.tree.getroot()
+        self.transformSnippets(root)
+        self.transformTextSnippets(root)
 
         return result

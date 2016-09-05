@@ -61,6 +61,11 @@ def apply_indentation(html, indent):
         for el in dom.cssselect('h1,h2,h3,h4,h5,h6'):
             tag = el.tag.lower()
             level = int(tag[-1])
-            el.tag = 'h' + str(level + indent)
+            el.attrib.update({
+                'original-tag': tag,
+                'class': el.attrib.get('class', '') + ' original-tag-' + tag
+            })
+            # do not allow tags < 0 or > 6
+            el.tag = 'h' + str(min(max(level + indent, 1), 6))
         html = tostring(dom)
     return html
