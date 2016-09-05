@@ -56,7 +56,7 @@ class TestTransform(BaseTest):
 ''')
 
         result = self._render_transform(page, 2)
-        self.assertTrue('<h3>Foobar 1' in result)
-        self.assertTrue('<h3>Foobar 2' in result)
-        self.assertTrue('<h4>Foobar 3' in result)
-        self.assertTrue('<h3>Foobar 4' in result)
+        self.assertTrue('<h3 class=" original-tag-h1" original-tag="h1">Foobar 1' in result)
+        self.assertTrue('<h3 class=" original-tag-h1" original-tag="h1">Foobar 2' in result)
+        self.assertTrue('<h4 class=" original-tag-h2" original-tag="h2">Foobar 3' in result)
+        self.assertTrue('<h3 class=" original-tag-h1" original-tag="h1">Foobar 4' in result)
