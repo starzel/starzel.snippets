@@ -184,7 +184,6 @@
 
     var $dom = $(that.options.editor.getBody()).clone();
     var $outputSnippetNode = $('#' + id, $dom);
-    debugger;
     $outputSnippetNode.attr({
       class: 'snippet-tag',
       'data-type': 'snippet_tag',
