@@ -83,15 +83,15 @@
   };
 
   SnippetModal.prototype.template = _.template('<div>' +
-    '<h1>Add snippet</h1>' +
+    '<h1>Help einbetten</h1>' +
     '<div>' +
       '<div class="form-group snippets-content">' +
-        '<label>Select content</label>' +
+        '<label>Inhalt auswählen</label>' +
         '<input class="pat-relateditems" type="text" value="<%= uid %>"' +
               " data-pat-relateditems='<%= reOptions %>' />" +
       '</div>' +
       '<div class="form-group snippets-indent">' +
-        '<label>Indentation Level</label>' +
+        '<label>Anpassung der Überschriften-Level</label>' +
         '<select>' +
           '<option value="-5">-5</option>' +
           '<option value="-4">-4</option>' +
@@ -108,15 +108,15 @@
       '</div>' +
     '</div>' +
     '<div class="portalMessage warning" style="display:none">' +
-      '<strong>Warning</strong>' +
-        'The header structure you have selected is not 508 compliant' +
+      '<strong>Warnung</strong>' +
+        'Die Überschriften-Reihenfolge des Zieldokumentes entspricht nicht gültigen Standards.' +
     '</div>' +
     '<div class="snippets-preview" style="display: none">' +
-      '<h2>Preview</h2>' +
+      '<h2>Vorschau</h2>' +
       '<div class="inner"></div>' +
     '</div>' +
-    '<button class="plone-btn plone-btn-default cancel-btn">Cancel</button>' +
-    '<button class="plone-btn plone-btn-primary insert-btn" disabled="true">Insert</button>' +
+    '<button class="plone-btn plone-btn-default cancel-btn">Abbrechen</button>' +
+    '<button class="plone-btn plone-btn-primary insert-btn" disabled="true">Einfügen</button>' +
   '</div>');
 
   SnippetModal.prototype.init = function(){
@@ -217,7 +217,7 @@
       that.check508();
       that.addHeaderAnnotations();
     }).fail(function(){
-      alert('error loading snippet data');
+      alert('Fehler beim Laden des Snippets');
     }).always(function(){
       utils.loading.hide();
     });
@@ -359,7 +359,7 @@
           ed.insertContent(ed.dom.createHTML('span', attrs, resp.result));
         }
       }).fail(function(){
-        alert('error loading snippet data');
+        alert('Fehler beim Laden des Snippets');
       }).always(function(){
         utils.loading.hide();
       });
@@ -400,15 +400,15 @@
   };
 
   TextEmbedModal.prototype.template = _.template('<div>' +
-    '<h1>Add text</h1>' +
+    '<h1>Text einbetten</h1>' +
     '<div>' +
       '<div class="form-group text-content">' +
-        '<label>Enter content</label>' +
+        '<label>Text</label>' +
         '<input type="text" value="<%= text %>" />' +
       '</div>' +
     '</div>' +
-    '<button class="plone-btn plone-btn-default cancel-btn">Cancel</button>' +
-    '<button class="plone-btn plone-btn-primary insert-btn">Insert</button>' +
+    '<button class="plone-btn plone-btn-default cancel-btn">Abbrechen</button>' +
+    '<button class="plone-btn plone-btn-primary insert-btn">Einfügen</button>' +
   '</div>');
 
   TextEmbedModal.prototype.init = function(){

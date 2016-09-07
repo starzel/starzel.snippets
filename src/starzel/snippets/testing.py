@@ -61,8 +61,12 @@ class BaseTest(unittest.TestCase):
         login(self.portal, TEST_USER_NAME)
         setRoles(self.portal, TEST_USER_ID, ('Member', 'Manager'))
 
-    def _create_page(self, _id='test-snippet', title='Test Snippet', text='<p>foobar</p>'):
-        page = api.content.create(type='Document', id=_id, title=title,
-                                  container=self.portal,
-                                  text=RichTextValue(text, 'text/html', 'text/html'))
+    def _create_page(self, _id='test-snippet', title='Test Snippet', text=u'<p>foobar</p>'):  # noqa
+        page = api.content.create(
+            type='Document',
+            id=_id,
+            title=title,
+            container=self.portal,
+            text=RichTextValue(text, 'text/html', 'text/x-html-safe'),
+        )
         return page
