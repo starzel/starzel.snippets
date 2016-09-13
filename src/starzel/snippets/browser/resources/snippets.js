@@ -183,7 +183,10 @@
     }
 
     var $dom = $(that.options.editor.getBody()).clone();
+
+    // tinymce adds a duplicate node to show selection but hides offscreen
     $('.mce-offscreen-selection', $dom).remove();
+
     var $outputSnippetNode = $('#' + id, $dom);
     $outputSnippetNode.attr({
       class: 'snippet-tag',
