@@ -20,6 +20,15 @@ from zope.interface import Interface
 import types
 
 
+def u(val):
+    if not isinstance(val, unicode):
+        try:
+            return val.decode('utf8')
+        except UnicodeDecodeError:
+            return val
+    return val
+
+
 class SnippetTransform(object):
     implements(ITransform)
     adapts(Interface, ISnippetsLayer)
@@ -82,12 +91,12 @@ class SnippetTransform(object):
                     className += ' snippet-container-missing'
 
                 snippet_container.attrib.update({
-                    'class': className,
-                    'data-source-uid': IUUID(ob),
-                    'data-source-id': ob.getId(),
-                    'data-source-title': ob.Title(),
-                    'data-source-indent': str(indent),
-                    'data-source-path': '/'.join(ob.getPhysicalPath())[len(site_path):]
+                    'class': u(className),
+                    'data-source-uid': u(IUUID(ob, None) or ''),
+                    'data-source-id': u(ob.getId()),
+                    'data-source-title': u(ob.Title()),
+                    'data-source-indent': unicode(indent),
+                    'data-source-path': u('/'.join(ob.getPhysicalPath())[len(site_path):])
                 })
 
                 content_el = fromstring(val)

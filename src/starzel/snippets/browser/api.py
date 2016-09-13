@@ -41,7 +41,7 @@ class SnippetsAPI(BrowserView):
         }
 
     def get_transformed(self):
-        html = self.request.form.get('html')
+        html = self.request.form.get('html').decode('utf8')
         transform = SnippetTransform(self.context, self.request)
         dom = fromstring(html)
         transform.transformSnippets(dom)
