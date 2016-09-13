@@ -183,6 +183,7 @@
     }
 
     var $dom = $(that.options.editor.getBody()).clone();
+    $('.mce-offscreen-selection', $dom).remove();
     var $outputSnippetNode = $('#' + id, $dom);
     $outputSnippetNode.attr({
       class: 'snippet-tag',
