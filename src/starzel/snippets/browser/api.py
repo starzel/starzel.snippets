@@ -37,7 +37,7 @@ class SnippetsAPI(BrowserView):
 
         return {
             'relatedItemsOptions': registry.get('starzel.snippets.related_items_options'),
-            'uid': IUUID(self.context)
+            'uid': IUUID(self.context, None)
         }
 
     def get_transformed(self):
