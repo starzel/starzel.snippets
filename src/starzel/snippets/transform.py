@@ -64,8 +64,6 @@ class SnippetTransform(object):
                 indent = 0
             if snippet_name not in rendered:
                 ob = uuidToObject(snippet_name)
-                if ob is None:
-                    ob = site.restrictedTraverse('.snippets/' + snippet_name, None)
                 if ob is not None:
                     rendered[snippet_name] = {
                         'html': evaluator.evaluate(expression, ob),
