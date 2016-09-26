@@ -94,7 +94,8 @@ class SnippetTransform(object):
                     'data-source-id': u(ob.getId()),
                     'data-source-title': u(ob.Title()),
                     'data-source-indent': unicode(indent),
-                    'data-source-path': u('/'.join(ob.getPhysicalPath())[len(site_path):])
+                    'data-source-path': u('/'.join(ob.getPhysicalPath())[len(site_path):]),
+                    'data-source-version': u(getattr(ob, 'version', '')),
                 })
 
                 content_el = fromstring(val)
