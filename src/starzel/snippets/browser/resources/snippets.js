@@ -41,6 +41,7 @@
 
     that.options = options;
     that.range = options.editor.selection.getRng();
+    that.originalEl = options.editor.selection.getNode();
 
     var uid = '';
     // force loading existing value if something selected
@@ -68,6 +69,10 @@
     });
     that.modal.on('shown', function() {
       that.init();
+      that.options.editor.focus();
+      that.options.editor.selection.select(that.originalEl);
+      that.options.editor.nodeChanged();
+
       if(uid){
         var indent = options.$node.attr('data-snippet-indent');
         if(indent){
@@ -325,6 +330,7 @@
   };
 
   SnippetModal.prototype.btnClicked = function($btn){
+    var that = this;
     var $node = this.options.$node;
     var ed = this.options.editor;
     var modal = this.modal;
@@ -355,6 +361,10 @@
           'data-snippet-id': data[0].UID,
           'data-snippet-indent': indent
         };
+
+        ed.focus();
+        ed.selection.setRng(that.rng);
+
         if($node){
           $node.attr(attrs);
           $node.text(resp.result);
