@@ -112,23 +112,6 @@ class SnippetTransform(object):
                     idx = parent.index(el)
                     parent[idx] = snippet_container
 
-    def transformTextSnippets(self, root):
-        context = self.getContext()
-
-        for el in root.cssselect('[data-type="text_snippet_tag"]'):
-            try:
-                el.text = el.text.format(**{
-                    'title': context.Title()
-                })
-            except KeyError:
-                pass
-
-    def getContext(self):
-        published = self.request.get('PUBLISHED')
-        if isinstance(published, types.MethodType):
-            return published.im_self
-        return aq_parent(published)
-
     def transformIterable(self, result, encoding):
         if self.request['PATH_INFO'].endswith('edit'):
             return result
@@ -150,6 +133,5 @@ class SnippetTransform(object):
 
         root = result.tree.getroot()
         self.transformSnippets(root)
-        self.transformTextSnippets(root)
 
         return result
