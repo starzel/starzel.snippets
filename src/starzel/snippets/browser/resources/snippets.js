@@ -414,9 +414,19 @@
 
   TextEmbedModal.prototype.template = _.template('<div>' +
     '<h1>Text einbetten</h1>' +
-    '<div>' +
+    '<div class="field">' +
+      '<div class="error" style="display:none"></div>' +
       '<div class="form-group text-content">' +
-        '<label>Text</label>' +
+        '<label>Text ' +
+        '<br/><span class="formHelp">Consists of textkeys only! If a textkey has parameters it is considered a textkey-structure. Values for all parameters in a textkey-structure must be listed, separated by "|". <br/>' +
+        'A textkey may consist of characters, digits and "_". Values of parameters have the same constrains. <br/>' +
+        'If more than one textkey is given each one must be surrounded by either "$textkey$" or "[TID:textkey]". ' +
+        'Additionally these characters are allowed between textkeys: . : ; , - + < > <br/>' +
+        'Examples: <br/>' +
+        'guard{0}open|1 <br/>' +
+        '$closingStation$ - $loadingSide$ <br/>' +
+        '[TID:blisterStackTransfer] - [TID:slider{0}|1] - [TID:zAxis]</span>' +
+        '</label>' +
         '<input type="text" value="<%= text %>" />' +
       '</div>' +
     '</div>' +
@@ -445,21 +455,35 @@
     }
 
     var text = $('.text-content input', modal.$modal).val();
-    var attrs = {
-      class: 'text-snippet-tag',
-      'data-type': 'text_snippet_tag',
-      contenteditable: false
-    };
-    text = prefix + text + suffix;
-    if($node){
-      $node.attr(attrs);
-      $node.html(text);
-    }else{
-      ed.insertContent(ed.dom.createHTML('span', attrs, text));
-    }
-    modal.hide();
+    $.ajax({
+      url: $('body').attr('data-base-url') + '/@@validate-textsnippet',
+      data: {
+        text: text,
+      }
+    }).done(function(validationmsg){
+      if(validationmsg){
+        var $errordiv = modal.$modal.find('div.error');
+        modal.$modal.find('div.field').addClass('error');
+        $errordiv.text(validationmsg);
+        $errordiv.show();
+        return
+      }else{
+        var attrs = {
+          class: 'text-snippet-tag',
+          'data-type': 'text_snippet_tag',
+          contenteditable: false
+        };
+        text = prefix + text + suffix;
+        if($node){
+          $node.attr(attrs);
+          $node.html(text);
+        }else{
+          ed.insertContent(ed.dom.createHTML('span', attrs, text));
+        }
+        modal.hide();
+      }
+    });
   };
-
 
   // tinymce plugins here!
   tinymce.create('tinymce.plugins.SnippetsPlugin', {
