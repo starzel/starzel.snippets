@@ -45,7 +45,6 @@ class SnippetsAPI(BrowserView):
         transform = SnippetTransform(self.context, self.request)
         dom = fromstring(html)
         transform.transformSnippets(dom)
-        transform.transformTextSnippets(dom)
         return {
             'success': True,
             'result': tostring(dom)
