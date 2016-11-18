@@ -454,20 +454,15 @@
       return;
     }
 
-    var text = $('.text-content input', modal.$modal).val();
+    var text = $('.text-content input', modal.$modal).val().trim();
+
+    // send input to validate-textsnippet for validation
     $.ajax({
       url: $('body').attr('data-base-url') + '/@@validate-textsnippet',
-      data: {
-        text: text,
-      }
+      data: { text: text }
     }).done(function(validationmsg){
-      if(validationmsg){
-        var $errordiv = modal.$modal.find('div.error');
-        modal.$modal.find('div.field').addClass('error');
-        $errordiv.text(validationmsg);
-        $errordiv.show();
-        return
-      }else{
+      if(validationmsg == true){
+        // valid: create textsnippet and close modal
         var attrs = {
           class: 'text-snippet-tag',
           'data-type': 'text_snippet_tag',
@@ -481,6 +476,18 @@
           ed.insertContent(ed.dom.createHTML('span', attrs, text));
         }
         modal.hide();
+      }else{
+        // invalid: display validation-message
+        // handle case when a error was already shown.
+        if (modal.$modal.find('div.field.error').length) {
+            modal.$modal.find('div.field.error').removeClass('error');
+            modal.$modal.find('div.error').text('')
+        }
+        var $errordiv = modal.$modal.find('div.error');
+        modal.$modal.find('div.field').addClass('error');
+        $errordiv.text(validationmsg);
+        $errordiv.show();
+        return
       }
     });
   };
