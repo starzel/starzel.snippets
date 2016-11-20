@@ -40,7 +40,6 @@ setup(name='starzel.snippets',
       zip_safe=False,
       install_requires=[
           'setuptools',
-    	  'plone.directives.form',
           'plone.api',
           'lxml',
           'z3c.unconfigure',
