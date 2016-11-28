@@ -413,19 +413,16 @@
   };
 
   TextEmbedModal.prototype.template = _.template('<div>' +
-    '<h1>Text einbetten</h1>' +
+    '<h1>Textkey einfügen</h1>' +
     '<div class="field">' +
       '<div class="error" style="display:none"></div>' +
       '<div class="form-group text-content">' +
         '<label>Text ' +
-        '<br/><span class="formHelp">Consists of textkeys only! If a textkey has parameters it is considered a textkey-structure. Values for all parameters in a textkey-structure must be listed, separated by "|". <br/>' +
-        'A textkey may consist of characters, digits and "_". Values of parameters have the same constrains. <br/>' +
-        'If more than one textkey is given each one must be surrounded by either "$textkey$" or "[TID:textkey]". ' +
-        'Additionally these characters are allowed between textkeys: . : ; , - + < > <br/>' +
+        '<br/><span class="formHelp">A textkey may consist of characters, digits and "_". Values of parameters have the same constrains. If a textkey has parameters it is considered a textkey-structure. <br/>' +
+        'Values for all parameters in a textkey-structure must be listed, separated by "|". Examples:<br/>' +
         'Examples: <br/>' +
-        'guard{0}open|1 <br/>' +
-        '$closingStation$ - $loadingSide$ <br/>' +
-        '[TID:blisterStackTransfer] - [TID:slider{0}|1] - [TID:zAxis]</span>' +
+        'loadingSide <br/>' +
+        'guard{0}open|1</span>' +
         '</label>' +
         '<input type="text" value="<%= text %>" />' +
       '</div>' +
